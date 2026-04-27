@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>SmartEstoque</title>
+</head>
+<body>
+
+<h1>Cadastro de Produto</h1>
+
+<input type="text" id="nome" placeholder="Nome do produto"><br><br>
+<input type="text" id="codigo" placeholder="Código"><br><br>
+<input type="number" id="preco" placeholder="Preço"><br><br>
+<input type="number" id="quantidade" placeholder="Quantidade"><br><br>
+
+<button onclick="cadastrar()">Cadastrar</button>
+
+<br><br>
+
+<input type="text" id="buscar" placeholder="Buscar por código">
+<button onclick="buscarProduto()">Buscar</button>
+
+<button onclick="limparHistorico()">
+Apagar Histórico
+</button>
+
+<h2>Produtos cadastrados:</h2>
+<ul id="lista"></ul>
+
+<script>
+
+let lista = document.getElementById("lista");
+
+let produtos =
+JSON.parse(localStorage.getItem("produtos")) || [];
+
+
+function mostrarProdutos(){
+
+lista.innerHTML = "";
+
+produtos.forEach(p=>{
+
+let item = document.createElement("li");
+
+item.textContent =
+`${p.nome} | Código: ${p.codigo} | R$ ${p.preco} | Qtd: ${p.quantidade}`;
+
+if(p.quantidade <= 5){
+ item.textContent += " ⚠ Estoque Baixo";
+}
+
+
+let btnEntrada = document.createElement("button");
+btnEntrada.textContent="+";
+
+btnEntrada.onclick=function(){
+
+p.quantidade++;
+
+localStorage.setItem(
+"produtos",
+JSON.stringify(produtos)
+);
+
+mostrarProdutos();
+
+};
+
+item.appendChild(btnEntrada);
+
+
+
+let btnSaida = document.createElement("button");
+btnSaida.textContent="-";
+
+btnSaida.onclick=function(){
+
+if(p.quantidade>0){
+
+p.quantidade--;
+
+localStorage.setItem(
+"produtos",
+JSON.stringify(produtos)
+);
+
+mostrarProdutos();
+
+}
+
+};
+
+item.appendChild(btnSaida);
+
+
+lista.appendChild(item);
+
+});
+
+}
+
+
+
+function cadastrar(){
+
+let nome =
+document.getElementById("nome").value;
+
+let codigo =
+document.getElementById("codigo").value;
+
+let preco =
+document.getElementById("preco").value;
+
+let quantidade =
+parseInt(
+document.getElementById("quantidade").value
+);
+
+
+if(!nome || !codigo || !preco || isNaN(quantidade)){
+alert("Preencha todos os campos");
+return;
+}
+
+
+let existe = produtos.find(
+p=>p.codigo==codigo
+);
+
+if(existe){
+alert("Código já cadastrado");
+return;
+}
+
+
+let produto={
+nome,
+codigo,
+preco,
+quantidade
+};
+
+
+produtos.push(produto);
+
+localStorage.setItem(
+"produtos",
+JSON.stringify(produtos)
+);
+
+mostrarProdutos();
+
+limparCampos();
+
+}
+
+
+
+function buscarProduto(){
+
+let codigoBusca =
+document.getElementById("buscar").value;
+
+let encontrado =
+produtos.find(
+p=>p.codigo==codigoBusca
+);
+
+if(encontrado){
+
+alert(
+`Produto:
+${encontrado.nome}
+
+Preço:
+R$ ${encontrado.preco}
+
+Quantidade:
+${encontrado.quantidade}`
+);
+
+}
+else{
+alert("Produto não encontrado");
+}
+
+}
+
+
+
+function limparCampos(){
+
+document.getElementById("nome").value="";
+document.getElementById("codigo").value="";
+document.getElementById("preco").value="";
+document.getElementById("quantidade").value="";
+
+}
+
+
+
+function limparHistorico(){
+
+if(confirm(
+"Deseja apagar todo histórico?"
+)){
+localStorage.removeItem("produtos");
+produtos=[];
+mostrarProdutos();
+}
+
+}
+
+
+mostrarProdutos();
+
+</script>
+
+</body>
+</html>
